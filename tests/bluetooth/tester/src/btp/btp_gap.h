@@ -363,6 +363,17 @@ struct btp_gap_ext_adv_stop_cmd {
 	uint8_t id;
 } __packed;
 
+#define BTP_GAP_EXT_START_DISCOVERY		0x30
+struct btp_gap_ext_start_discovery_cmd {
+	uint8_t type;
+	uint16_t options;
+	uint16_t interval_1m;
+	uint16_t window_1m;
+	uint16_t interval_coded;
+	uint16_t window_coded;
+	uint16_t timeout;
+} __packed;
+
 /* events */
 #define BTP_GAP_EV_NEW_SETTINGS			0x80
 struct btp_gap_new_settings_ev {
@@ -487,9 +498,26 @@ struct btp_gap_ev_periodic_transfer_received_ev {
 	uint8_t data[];
 } __packed;
 
-#define BTP_GAP_EV_EXT_ADV_SET_TERMINATED 0x91
+#define BTP_GAP_EV_EXT_ADV_SET_TERMINATED	0x91
 struct btp_gap_ev_ext_adv_set_terminated_ev {
 	uint8_t id;
+} __packed;
+
+#define BTP_GAP_EV_EXT_DISCOVERY_TIMEOUT	0x92
+
+#define BTP_GAP_EV_EXT_DEVICE_FOUND		0x93
+struct btp_gap_ev_ext_device_found_ev {
+	bt_addr_le_t address;
+	uint8_t sid;
+	int8_t rssi;
+	int8_t tx_power;
+	uint8_t adv_type;
+	uint16_t adv_props;
+	uint16_t periodic_adv_interval;
+	uint8_t primary_phy;
+	uint8_t secondary_phy;
+	uint16_t data_len;
+	uint8_t data[];
 } __packed;
 
 #if defined(CONFIG_BT_EXT_ADV)

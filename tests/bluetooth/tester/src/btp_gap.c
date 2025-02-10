@@ -35,6 +35,8 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME, CONFIG_BTTESTER_LOG_LEVEL);
 #define BT_LE_AD_DISCOV_MASK (BT_LE_AD_LIMITED | BT_LE_AD_GENERAL)
 #if defined(CONFIG_BT_EXT_ADV)
 #define ADV_BUF_LEN (sizeof(struct btp_gap_device_found_ev) + 2 * CONFIG_BT_EXT_SCAN_BUF_SIZE)
+static bool ext_scan_cb_registered;
+
 #else
 #define ADV_BUF_LEN (sizeof(struct btp_gap_device_found_ev) + 2 * 31)
 #endif
@@ -821,7 +823,7 @@ static uint8_t ext_adv_set_data(const void *cmd, uint16_t cmd_len,
 		ad[idx].data = &cp->data[pos];
 		pos += len - 1;
 	}
-	
+
 	struct bt_data sd = {
 		.data = cp->data + cp->data_len,
 		.data_len = cp->scan_response_length,
@@ -879,6 +881,75 @@ static uint8_t ext_adv_stop(const void *cmd, uint16_t cmd_len,
 	if (err) {
 		LOG_ERR("Failed to stop advertising");
 
+		return BTP_STATUS_FAILED;
+	}
+
+	return BTP_STATUS_SUCCESS;
+}
+
+static struct net_buf_simple *adv_buf;
+
+static void ext_device_found(const struct bt_le_scan_recv_info *info,
+			     struct net_buf_simple *buf_ad)
+{
+	struct btp_gap_ev_ext_device_found_ev *ev;
+
+	net_buf_simple_init(adv_buf, 0);
+	ev = net_buf_simple_add(adv_buf, sizeof(*ev));
+
+	bt_addr_le_copy(&ev->address, info->addr);
+	ev->sid = info->sid;
+	ev->rssi = info->rssi;
+	ev->tx_power = info->tx_power;
+	ev->adv_type = info->adv_type;
+	ev->adv_props = info->adv_props;
+	ev->periodic_adv_interval = info->interval;
+	ev->primary_phy = info->primary_phy;
+	ev->secondary_phy = info->secondary_phy;
+	ev->data_len = buf_ad->len;
+	net_buf_simple_add_mem(adv_buf, buf_ad->data, buf_ad->len);
+	tester_event(BTP_SERVICE_ID_GAP, BTP_GAP_EV_EXT_DEVICE_FOUND, adv_buf->data, adv_buf->len);
+	net_buf_simple_reset(adv_buf);
+}
+
+static void ext_discovery_timeout(void)
+{
+	tester_event(BTP_SERVICE_ID_GAP, BTP_GAP_EV_EXT_DISCOVERY_TIMEOUT, NULL, 0);
+}
+
+struct bt_le_scan_cb ext_scan_cb = {
+	.recv = ext_device_found,
+	.timeout = ext_discovery_timeout,
+	.node = NULL, /* This is used internally by the stack */
+};
+
+static uint8_t ext_start_discovery(const void *cmd, uint16_t cmd_len,
+				void *rsp, uint16_t *rsp_len)
+{
+	int err;
+	struct bt_le_scan_param params;
+	const struct btp_gap_ext_start_discovery_cmd *cp = cmd;
+
+	/* Let the stack validate the parameters */
+	params.type = cp->type;
+	params.options = cp->options & 0xff;
+	params.interval = cp->interval_1m;
+	params.window = cp->window_1m;
+	params.interval_coded = cp->interval_coded;
+	params.window_coded = cp->window_coded;
+	params.timeout = cp->timeout;
+
+	if (!ext_scan_cb_registered) {
+		err = bt_le_scan_cb_register(&ext_scan_cb);
+		if (err) {
+			LOG_ERR("Failed to register ext scan callback, err = %d", err);
+			return BTP_STATUS_FAILED;
+		}
+		ext_scan_cb_registered = true;
+	}
+	err = bt_le_scan_start(&params, NULL);
+	if (err) {
+		LOG_ERR("Failed to start ext scan, err = %d", err);
 		return BTP_STATUS_FAILED;
 	}
 
@@ -2204,6 +2275,11 @@ static const struct btp_handler handlers[] = {
 		.opcode = BTP_GAP_EXT_ADV_STOP,
 		.expect_len = sizeof(struct btp_gap_ext_adv_stop_cmd),
 		.func = ext_adv_stop,
+	},
+	{
+		.opcode = BTP_GAP_EXT_START_DISCOVERY,
+		.expect_len = sizeof(struct btp_gap_ext_start_discovery_cmd),
+		.func = ext_start_discovery,
 	},
 #if defined(CONFIG_BT_PER_ADV)
 	{
