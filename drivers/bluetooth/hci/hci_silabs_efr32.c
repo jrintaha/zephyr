@@ -34,7 +34,7 @@ struct hci_data {
 #define CTLR_RL_SIZE 0
 #endif
 
-static K_KERNEL_STACK_DEFINE(slz_ll_stack, CONFIG_BT_SILABS_EFR32_ACCEPT_LINK_LAYER_STACK_SIZE);
+static K_KERNEL_STACK_DEFINE(slz_ll_stack, CONFIG_BT_SILABS_EFR32_LINK_LAYER_STACK_SIZE);
 static struct k_thread slz_ll_thread;
 
 static K_KERNEL_STACK_DEFINE(slz_rx_stack, CONFIG_BT_DRV_RX_STACK_SIZE);

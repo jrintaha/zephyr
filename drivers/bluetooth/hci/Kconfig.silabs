@@ -21,7 +21,7 @@ config BT_SILABS_EFR32_USER_ADVERTISERS
 	int "User advertisement sets"
 	default 1
 	help
-	  Amount of advertisement sets reserved for application.
+	  Number of advertisement sets reserved for the application.
 
 config BT_SILABS_EFR32_ACCEPT_LIST_SIZE
 	int "Accept list size"
@@ -31,21 +31,47 @@ config BT_SILABS_EFR32_ACCEPT_LIST_SIZE
 
 config BT_SILABS_EFR32_COMPLETED_PACKETS_THRESHOLD
 	int "Completed packet reporting threshold"
-	default 1
+	default 4
 	help
-	  Completed packet reporting threshold value.
+	  The number of transmitted air interface ACL packets to trigger the
+	  Number Of Completed Packets HCI event.
 
 config BT_SILABS_EFR32_COMPLETED_PACKETS_TIMEOUT
 	int "Completed packet report event timeout"
 	default 3
 	help
-	  Completed packet report event timeout.
+	  The maximum number of connection events since the previous Number Of
+	  Completed Packets HCI event to trigger reporting of any unreported
+	  completed ACL packets.
 
-config BT_SILABS_EFR32_ACCEPT_LINK_LAYER_STACK_SIZE
-	int "Link layer stack size"
+config BT_SILABS_EFR32_LINK_LAYER_STACK_SIZE
+	int "Link layer thread stack size"
 	default 1024
 	help
-	  Link layer stack size.
+	  Link layer thread stack size.
+
+config BT_SILABS_EFR32_MAX_QUEUED_ADV_REPORTS
+	int "Maximum queued advertising reports"
+	default 10
+	help
+	  Maximum queued advertising reports.
+	  Additional advertising reports are dropped.
+
+config BT_SILABS_EFR32_HIGH_POWER
+	bool "Enable high power transmission"
+	default n
+	help
+	  Normally the transmit power is limited to 10 dBm. Enable this option
+	  to allow the controller to transmit at higher power levels. Note that
+	  this feature is not available on all devices.
+
+config BT_SILABS_EFR32_HIGH_POWER_AFH
+	bool "Enable adaptive frequency hopping for high power transmitters"
+	default n
+	depends on BT_SILABS_EFR32_HIGH_POWER
+	help
+	  When high power is used, the controller may be required to perform
+	  adaptive frequency hopping to comply with regulatory requirements.
 
 config BT_SILABS_EFR32_LL_THREAD_PRIO
 	# Hidden option for Co-Operative Link Layer thread priority
