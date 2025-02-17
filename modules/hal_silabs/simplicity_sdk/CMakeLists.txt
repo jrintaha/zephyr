@@ -66,6 +66,7 @@ if(CONFIG_SOC_GECKO_HAS_RADIO)
     add_prebuilt_library(libbgcommon  protocol/bluetooth/bgcommon/lib/build/gcc/cortex-m33/bgcommon/release/libbgcommon.a)
     zephyr_library_sources(src/sl_btctrl_hci_reset_shim.c)
     zephyr_library_sources(${BLUETOOTH_DIR}/bgstack/ll/src/sl_bluetooth_controller.c)
+    zephyr_include_directories(config/ll)
 
     # link mbedTLS
     if(CONFIG_MBEDTLS)

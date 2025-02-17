@@ -73,6 +73,41 @@ config BT_SILABS_EFR32_HIGH_POWER_AFH
 	  When high power is used, the controller may be required to perform
 	  adaptive frequency hopping to comply with regulatory requirements.
 
+config BT_SILABS_EFR32_MAX_CS_CONFIGS_PER_CONNECTION
+	int "Maximum number of CS configurations per connection"
+	default 4
+	help
+	  Defines the number of Channel Sounding configurations the application
+	  needs per Bluetooth connection.
+
+config BT_SILABS_EFR32_MAX_CS_PROCEDURES
+	int "Maximum number of CS procedures per CS configuration"
+	default 2
+	help
+	  Defines the number of Channel Sounding procedures the application
+	  needs per Channel Sounding configuration.
+
+config BT_SILABS_EFR32_MAX_PAWR_SYNCHRONIZERS
+	int "Maximum number of PAWR synchronizers"
+	default 1
+	depends on BT_PER_ADV_SYNC
+	range 1 BT_PER_ADV_SYNC_MAX
+	help
+	  Define the number of periodic synchronizing instances that the
+	  application needs to use concurrently for Periodic Advertising
+	  with Responses. This number must not exceed the number of periodic
+	  advertising synchronization instances.
+
+config BT_SILABS_EFR32_MAX_PERIODIC_ADVERTISERS
+	int "Maximum number of periodic advertisers"
+	default 1
+	depends on BT_PER_ADV
+	range 1 BT_EXT_ADV_MAX_ADV_SET
+	help
+	  Define the number of periodic advertising instances that the
+	  application needs to use concurrently. This number must not exceed
+	  the number of total advertisement sets.
+
 config BT_SILABS_EFR32_LL_THREAD_PRIO
 	# Hidden option for Co-Operative Link Layer thread priority
 	def_int 0
