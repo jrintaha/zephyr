@@ -297,7 +297,7 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 	sl_btctrl_disable_coded_phy();
 
 	/* sl_btctrl_init_mem returns the number of memory buffers allocated */
-	ret = sl_btctrl_init_mem(CONFIG_BT_SILABS_EFR32_BUFFER_MEMORY);
+	ret = sl_btctrl_init_mem();
 	if (!ret) {
 		LOG_ERR("Failed to allocate memory %d", ret);
 		return -ENOMEM;
@@ -385,11 +385,6 @@ void BTLE_LL_EventRaise(uint32_t events)
 {
 	atomic_or(&sli_btctrl_events, events);
 	k_sem_give(&slz_ll_sem);
-}
-
-void sl_bt_controller_init(void)
-{
-	/* No extra initialization procedure required */
 }
 
 static DEVICE_API(bt_hci, drv) = {
