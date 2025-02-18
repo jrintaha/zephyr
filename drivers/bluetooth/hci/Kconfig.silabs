@@ -108,6 +108,137 @@ config BT_SILABS_EFR32_MAX_PERIODIC_ADVERTISERS
 	  application needs to use concurrently. This number must not exceed
 	  the number of total advertisement sets.
 
+config BT_SILABS_EFR32_MAX_PAWR_ADVERTISERS
+	int "Maximum numbers of Periodic Advertising With Response advertisers"
+	default 0
+	range 0 BT_SILABS_EFR32_MAX_PERIODIC_ADVERTISERS
+	depends on BT_PER_ADV_RSP
+
+config BT_SILABS_EFR32_MAX_PAWR_ADVERTISED_DATA_LENGTH_HINT
+	int "Give a hint to the controller about the maximum PAwR data length"
+	default 61
+	range 0 251
+	depends on BT_PER_ADV_RSP
+	help
+	  The maximum data length that the application expects to send in a
+	  Periodic Advertising with Response packet. The controller will use
+	  this hint to optimize the scheduling of concurrent connections.
+	  This value does not preclude using longer data lengths.
+
+config BT_SILABS_EFR32_PAWR_PACKET_REQUEST_COUNT
+	int "Number of PAwR packets from host per request"
+	default 4
+	range 1 12
+	depends on BT_PER_ADV_RSP
+	help
+	  The number of packets the controller requests from the host in one LE
+	  Periodic Advertising Subevent Data Request event. This is a tradeoff
+	  between the controller's memory usage and the number of separate HCI
+	  events the controller must send. This value is applied to each PAwR
+	  advertiser separately. Note that the request count is limited by the
+	  number of subevents in the PAwR train, and the request advance
+	  configuration.
+
+config BT_SILABS_EFR32_PAWR_PACKET_REQUEST_ADVANCE
+	int "Number of subevents in advance to request PAwR data"
+	default 1
+	range 1 6
+	depends on BT_PER_ADV_RSP
+	help
+	  The controller asks the host to provide data for upcoming subevents
+	  before the subevents are sent over the air. This parameter is used to
+	  configure how many subevents in advance the requests are sent to the
+	  host. The bigger the advance is, the more time the host has to
+	  process the request, but the controller has to reserve more memory
+	  for buffering the subevent data. Note that the maximum advance is
+	  limited by the number of subevents configured for a PAwR train.
+	  Therefore, the actual advance may be less than the number configured
+	  in this parameter.
+
+config BT_SILABS_EFR32_ACTIVATE_POWER_CONTROL
+	bool "Enable power control"
+	default y
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  Enable power control to adjust the transmit power based on the
+	  received signal strength. The controller will ask the transmitter
+	  to adjust its transmit power to keep the RSSI of the received
+	  packets within the golden ranges, specified separately for each PHY.
+
+config BT_SILABS_EFR32_GOLDEN_RSSI_MIN_1M
+	int "Lower bound of the golden RSSI range for 1M PHY"
+	default -60
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The lower bound of the golden RSSI range for 1M PHY.
+
+config BT_SILABS_EFR32_GOLDEN_RSSI_MAX_1M
+	int "Upper bound of the golden RSSI range for 1M PHY"
+	default -40
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The upper bound of the golden RSSI range for 1M PHY.
+
+config BT_SILABS_EFR32_GOLDEN_RSSI_MIN_2M
+	int "Lower bound of the golden RSSI range for 2M PHY"
+	default -60
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The lower bound of the golden RSSI range for 2M PHY.
+
+config BT_SILABS_EFR32_GOLDEN_RSSI_MAX_2M
+	int "Upper bound of the golden RSSI range for 2M PHY"
+	default -40
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The upper bound of the golden RSSI range for 2M PHY.
+
+config BT_SILABS_EFR32_GOLDEN_RSSI_MIN_CODED_S8
+	int "Lower bound of the golden RSSI range for Coded S=8 PHY"
+	default -60
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The lower bound of the golden RSSI range for Coded S=8 PHY.
+
+config BT_SILABS_EFR32_GOLDEN_RSSI_MAX_CODED_S8
+	int "Upper bound of the golden RSSI range for Coded S=8 PHY"
+	default -40
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The upper bound of the golden RSSI range for Coded S=8 PHY.
+
+config BT_SILABS_EFR32_GOLDEN_RSSI_MIN_CODED_S2
+	int "Lower bound of the golden RSSI range for Coded S=2 PHY"
+	default -60
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The lower bound of the golden RSSI range for Coded S=2 PHY.
+
+config BT_SILABS_EFR32_GOLDEN_RSSI_MAX_CODED_S2
+	int "Upper bound of the golden RSSI range for Coded S=2 PHY"
+	default -40
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The upper bound of the golden RSSI range for Coded S=2 PHY.
+
+config BT_SILABS_EFR32_DEFAULT_MAX_POWER_LEVEL
+	int "Default maximum power level in deci-dBm"
+	default 32767
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The default maximum power level in units of deci-dBm. Use this to limit
+	  the maximum power level to a value lower than the maximum allowed by
+	  the radio. Set to 32767 (0x7fff) to use the maximum supported by the radio.
+
+config BT_SILABS_EFR32_DEFAULT_MIN_POWER_LEVEL
+	int "Default minimum power level in deci-dBm"
+	default 32767
+	depends on BT_TRANSMIT_POWER_CONTROL
+	help
+	  The default minimum power level in units of deci-dBm. Use this to limit
+	  the minimum power level to a value higher than the minimum allowed by
+	  the radio. Set to 32767 (0x7fff) to use the minimum supported by the radio.
+
 config BT_SILABS_EFR32_LL_THREAD_PRIO
 	# Hidden option for Co-Operative Link Layer thread priority
 	def_int 0
