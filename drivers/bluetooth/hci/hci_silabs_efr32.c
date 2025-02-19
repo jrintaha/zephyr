@@ -273,6 +273,7 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 {
 	struct hci_data *hci = dev->data;
 	int ret;
+	sl_status_t status;
 
 	BUILD_ASSERT(CONFIG_NUM_METAIRQ_PRIORITIES > 0,
 		     "Config NUM_METAIRQ_PRIORITIES must be greater than 0");
@@ -292,53 +293,16 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 	rail_isr_installer();
 	sl_rail_util_pa_init();
 
-	/* Disable 2M and coded PHYs, they do not work with the current configuration */
-	sl_btctrl_disable_2m_phy();
-	sl_btctrl_disable_coded_phy();
-
-	/* sl_btctrl_init_mem returns the number of memory buffers allocated */
-	ret = sl_btctrl_init_mem();
-	if (!ret) {
-		LOG_ERR("Failed to allocate memory %d", ret);
-		return -ENOMEM;
-	}
-
-	sl_btctrl_configure_le_buffer_size(CONFIG_BT_BUF_ACL_TX_COUNT);
-
-	if (IS_ENABLED(CONFIG_BT_CTLR_PRIVACY)) {
-		sl_btctrl_allocate_resolving_list_memory(CTLR_RL_SIZE);
-		sl_btctrl_init_privacy();
-	}
-
-	ret = sl_btctrl_init_ll();
-	if (ret) {
-		LOG_ERR("Bluetooth link layer init failed %d", ret);
+	status = sl_bt_controller_init();
+	if (status != SL_STATUS_OK) {
+		LOG_ERR("sl_bt_controller_init failed, status=%d", status);
+		ret = -EIO;
 		goto deinit;
 	}
 
 	slz_set_tx_power(CONFIG_BT_CTLR_TX_PWR_ANTENNA);
 
-	sl_btctrl_init_adv();
-	sl_btctrl_init_scan();
-	sl_btctrl_init_conn();
-	sl_btctrl_init_phy();
-
-	if (IS_ENABLED(CONFIG_BT_EXT_ADV)) {
-		sl_btctrl_init_adv_ext();
-		sl_btctrl_init_scan_ext();
-	}
-
-	ret = sl_btctrl_init_basic(MAX_CONN, CONFIG_BT_SILABS_EFR32_USER_ADVERTISERS + MAX_CONN,
-				   CONFIG_BT_SILABS_EFR32_ACCEPT_LIST_SIZE);
-	if (ret) {
-		LOG_ERR("Failed to initialize the controller %d", ret);
-		goto deinit;
-	}
-
-	sl_btctrl_configure_completed_packets_reporting(
-		CONFIG_BT_SILABS_EFR32_COMPLETED_PACKETS_THRESHOLD,
-		CONFIG_BT_SILABS_EFR32_COMPLETED_PACKETS_TIMEOUT);
-
+	/* TODO: init hci parsers based on features */
 	sl_bthci_init_upper();
 	sl_btctrl_hci_parser_init_default();
 	sl_btctrl_hci_parser_init_conn();
@@ -371,7 +335,7 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 
 	return 0;
 deinit:
-	sli_btctrl_deinit_mem();
+	sl_bt_controller_deinit(); /* No-op if controller initialization failed */
 	return ret;
 }
 
