@@ -293,6 +293,7 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 	rail_isr_installer();
 	sl_rail_util_pa_init();
 
+	/* Initialize Controller features based on Kconfig values */
 	status = sl_bt_controller_init();
 	if (status != SL_STATUS_OK) {
 		LOG_ERR("sl_bt_controller_init failed, status=%d", status);
@@ -302,31 +303,12 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 
 	slz_set_tx_power(CONFIG_BT_CTLR_TX_PWR_ANTENNA);
 
-	/* TODO: init hci parsers based on features */
-	sl_bthci_init_upper();
-	sl_btctrl_hci_parser_init_default();
-	sl_btctrl_hci_parser_init_conn();
-	sl_btctrl_hci_parser_init_adv();
-	sl_btctrl_hci_parser_init_phy();
-
-	if (IS_ENABLED(CONFIG_BT_SILABS_EFR32_HCI_VS)) {
-		sl_bthci_init_vs();
-	}
+	sl_bt_hci_init();
 
 	if (IS_ENABLED(CONFIG_PM)) {
-		RAIL_ConfigSleep(BTLE_LL_GetRadioHandle(), RAIL_SLEEP_CONFIG_TIMERSYNC_ENABLED);
-		RAIL_Status_t status = RAIL_InitPowerManager();
-
-		if (status != RAIL_STATUS_NO_ERROR) {
-			LOG_ERR("RAIL: failed to initialize power management, status=%d",
-					status);
-			ret = -EIO;
-			goto deinit;
-		}
-	}
-
-	if (IS_ENABLED(CONFIG_BT_CTLR_PRIVACY)) {
-		sl_btctrl_hci_parser_init_privacy();
+		/* FIXME: should come from a proper header file */
+		void sl_btctrl_hci_sleep_init(void);
+		sl_btctrl_hci_sleep_init();
 	}
 
 	hci->recv = recv;
