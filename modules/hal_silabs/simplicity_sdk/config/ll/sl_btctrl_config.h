@@ -46,7 +46,9 @@
 #endif
 #endif
 
-#if defined(CONFIG_BT_EXT_ADV_LEGACY_SUPPORT)
+#if defined(CONFIG_BT_BROADCASTER)
+/* Both the legacy and extended advertiser require the base advertiser. */
+#define SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT
 #define SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_ADVERTISER_PRESENT
 #endif
 
@@ -76,7 +78,6 @@
 
 #if defined(CONFIG_BT_EXT_ADV)
 #define SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
-#define SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_ADVERTISER_PRESENT
 #endif
 
 #if defined(CONFIG_BT_PER_ADV_SYNC_TRANSFER_RECEIVER)
@@ -126,12 +127,6 @@
 #endif
 
 #define SL_CATALOG_BLUETOOTH_FEATURE_PHY_SUPPORT_CONFIG_PRESENT
-
-/* Both the legacy and extended advertiser require the base advertiser */
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT) \
-	|| defined(SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_ADVERTISER_PRESENT)
-#define SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT
-#endif
 
 /* The following maps vendor-specific features to SL_CATALOG items */
 #if defined(CONFIG_BT_SILABS_EFR32_HIGH_POWER)
