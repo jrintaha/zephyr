@@ -326,6 +326,11 @@ bool sli_pending_btctrl_events(void)
 	return false; /* TODO: check if this should really return false! */
 }
 
+void sli_btctrl_events_init(void)
+{
+	atomic_clear(&sli_btctrl_events);
+}
+
 /* Store event flags and increment the LL semaphore */
 void BTLE_LL_EventRaise(uint32_t events)
 {
