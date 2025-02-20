@@ -68,6 +68,7 @@ if(CONFIG_SOC_GECKO_HAS_RADIO)
     zephyr_library_sources(src/sl_btctrl_hci_init.c)
     zephyr_library_sources(${BLUETOOTH_DIR}/bgstack/ll/src/sl_bluetooth_controller.c)
     zephyr_include_directories(config/ll)
+    zephyr_include_directories(include)
 
     # link mbedTLS
     if(CONFIG_MBEDTLS)

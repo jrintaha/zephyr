@@ -7,6 +7,7 @@
 #include <zephyr/drivers/bluetooth.h>
 #include <zephyr/kernel.h>
 
+#include <sl_btctrl_hci_init.h>
 #include <sl_btctrl_linklayer.h>
 #include <sl_hci_common_transport.h>
 #include <pa_conversions_efr32.h>
@@ -54,7 +55,6 @@ void BTLE_LL_EventRaise(uint32_t events);
 void BTLE_LL_Process(uint32_t events);
 int16_t BTLE_LL_SetMaxPower(int16_t power);
 bool sli_pending_btctrl_events(void);
-RAIL_Handle_t BTLE_LL_GetRadioHandle(void);
 
 void rail_isr_installer(void)
 {
