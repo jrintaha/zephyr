@@ -55,6 +55,7 @@ void BTLE_LL_EventRaise(uint32_t events);
 void BTLE_LL_Process(uint32_t events);
 int16_t BTLE_LL_SetMaxPower(int16_t power);
 bool sli_pending_btctrl_events(void);
+RAIL_Handle_t BTLE_LL_GetRadioHandle(void);
 
 void rail_isr_installer(void)
 {
@@ -273,7 +274,7 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 {
 	struct hci_data *hci = dev->data;
 	int ret;
-	sl_status_t status;
+	sl_status_t sl_status;
 
 	BUILD_ASSERT(CONFIG_NUM_METAIRQ_PRIORITIES > 0,
 		     "Config NUM_METAIRQ_PRIORITIES must be greater than 0");
@@ -294,9 +295,9 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 	sl_rail_util_pa_init();
 
 	/* Initialize Controller features based on Kconfig values */
-	status = sl_btctrl_init();
-	if (status != SL_STATUS_OK) {
-		LOG_ERR("sl_bt_controller_init failed, status=%d", status);
+	sl_status = sl_btctrl_init();
+	if (sl_status != SL_STATUS_OK) {
+		LOG_ERR("sl_bt_controller_init failed, status=%d", sl_status);
 		ret = -EIO;
 		goto deinit;
 	}
@@ -306,9 +307,15 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 	sl_bt_hci_init();
 
 	if (IS_ENABLED(CONFIG_PM)) {
-		/* FIXME: should come from a proper header file */
-		void sl_btctrl_hci_sleep_init(void);
-		sl_btctrl_hci_sleep_init();
+		RAIL_ConfigSleep(BTLE_LL_GetRadioHandle(), RAIL_SLEEP_CONFIG_TIMERSYNC_ENABLED);
+		RAIL_Status_t status = RAIL_InitPowerManager();
+
+		if (status != RAIL_STATUS_NO_ERROR) {
+			LOG_ERR("RAIL: failed to initialize power management, status=%d",
+					status);
+			ret = -EIO;
+			goto deinit;
+		}
 	}
 
 	hci->recv = recv;
