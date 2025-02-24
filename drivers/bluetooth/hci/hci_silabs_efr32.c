@@ -294,7 +294,7 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 	sl_rail_util_pa_init();
 
 	/* Initialize Controller features based on Kconfig values */
-	status = sl_bt_controller_init();
+	status = sl_btctrl_init();
 	if (status != SL_STATUS_OK) {
 		LOG_ERR("sl_bt_controller_init failed, status=%d", status);
 		ret = -EIO;
@@ -317,7 +317,7 @@ static int slz_bt_open(const struct device *dev, bt_hci_recv_t recv)
 
 	return 0;
 deinit:
-	sl_bt_controller_deinit(); /* No-op if controller initialization failed */
+	sl_btctrl_deinit(); /* No-op if controller initialization failed */
 	return ret;
 }
 
